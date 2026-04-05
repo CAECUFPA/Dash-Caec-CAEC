@@ -4,13 +4,13 @@ import time
 import logging
 import pandas as pd
 import gspread
-from typing import List, Optional
-from fastapi import FastAPI, Depends
+from typing import List
+from fastapi import FastAPI
 from fastapi.middleware.cors import CORSMiddleware
 from google.oauth2.service_account import Credentials
 from pydantic import BaseModel
 
-# Configuração de Logs
+# Logs para debug no painel da Vercel
 logging.basicConfig(level=logging.INFO)
 logger = logging.getLogger(__name__)
 
@@ -34,18 +34,23 @@ class GoogleSheetsService:
         if self._client is None:
             creds_json = os.getenv("GOOGLE_CREDS")
             if not creds_json:
-                raise ValueError("Variável GOOGLE_CREDS não configurada no Vercel")
+                raise ValueError("Variável GOOGLE_CREDS não encontrada")
 
-            creds_dict = json.loads(creds_json)
+            # Garante que o JSON seja lido corretamente mesmo com quebras de linha
+            creds_dict = json.loads(creds_json, strict=False)
             creds = Credentials.from_service_account_info(
                 creds_dict,
-                scopes=["https://www.googleapis.com/auth/spreadsheets", "https://www.googleapis.com/auth/drive"]
+                scopes=[
+                    "https://www.googleapis.com/auth/spreadsheets",
+                    "https://www.googleapis.com/auth/drive"
+                ]
             )
             self._client = gspread.authorize(creds)
         return self._client
 
     def parse_money_caec(self, val) -> float:
         if pd.isna(val) or str(val).strip() == "": return 0.0
+        # Remove R$, pontos de milhar e troca vírgula por ponto
         s = str(val).strip().replace("R$", "").replace(".", "").replace(",", ".").replace(" ", "")
         try:
             return float(s)
@@ -55,6 +60,7 @@ class GoogleSheetsService:
     def fetch_data(self) -> List[dict]:
         now = time.time()
         if self._cache_data and (now - self._cache_timestamp) < self.cache_ttl:
+            logger.info("Retornando dados do cache")
             return self._cache_data
 
         data = self._process()
@@ -64,12 +70,15 @@ class GoogleSheetsService:
 
     def _process(self) -> List[dict]:
         client = self._get_client()
+        # Abre a planilha pelo nome configurado no Vercel
         sh = client.open(os.getenv("SPREADSHEET_NAME"))
-        ws = sh.get_worksheet(int(os.getenv("WORKSHEET_INDEX", 0))) # Vercel usa índice base 0 geralmente
+        idx = int(os.getenv("WORKSHEET_INDEX", 0))
+        ws = sh.get_worksheet(idx)
 
         values = ws.get_all_values()
         if not values: return []
 
+        # Localiza a linha do cabeçalho dinamicamente
         header_idx = 0
         for i, row in enumerate(values[:10]):
             if "DATA" in [str(c).upper() for c in row]:
@@ -78,10 +87,14 @@ class GoogleSheetsService:
 
         headers = [str(h).strip() for h in values[header_idx]]
         df = pd.DataFrame(values[header_idx + 1:], columns=headers)
+
+        # Converte a coluna VALOR
         df["VALOR_NUM"] = df["VALOR"].apply(self.parse_money_caec)
 
         result = []
         for i, row in df.iterrows():
+            if not row.get("DATA"): continue # Pula linhas vazias
+
             val = row["VALOR_NUM"]
             tipo_str = str(row.get("TIPO", "")).upper()
 
@@ -98,6 +111,7 @@ class GoogleSheetsService:
 
 app = FastAPI()
 
+# CORS configurado para aceitar requisições do seu frontend Vercel
 app.add_middleware(
     CORSMiddleware,
     allow_origins=["*"],
@@ -113,4 +127,4 @@ async def get_data():
 
 @app.get("/api/health")
 def health():
-    return {"status": "online", "provider": "vercel"}
+    return {"status": "online", "provider": "vercel", "cache_ttl": service.cache_ttl}
