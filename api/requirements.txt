@@ -1,0 +1,7 @@
+fastapi
+mangum
+pandas
+numpy
+gspread
+google-auth
+python-dotenv

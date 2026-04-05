@@ -1,0 +1,49 @@
+@import "tailwindcss";
+
+@theme {
+  /* Fontes - Definição da Identidade */
+  --font-mono: "JetBrains Mono", monospace;
+  --font-sans: "Inter", system-ui, sans-serif;
+
+  /* Paleta Cromática (IDG Atena) */
+  --color-atena-yellow: #F9E076;
+  --color-atena-blue: #7895B2;
+  --color-atena-teal: #74B4B0;
+  --color-atena-red: #F29C9F;
+  --color-atena-purple: #B8A2D3;
+
+  /* Superfícies Industriais */
+  --color-industrial-950: #0A0C10;
+  /* Deep Black */
+  --color-industrial-900: #12151C;
+  /* Panel Background */
+  --color-industrial-800: #1E232D;
+  /* Borders/Elevations */
+}
+
+@layer base {
+
+  /* Configuração de Fonte Global para Dashboard */
+  body {
+    @apply bg-industrial-800 text-slate-400 font-sans antialiased;
+  }
+
+  /* Força mono em dados numéricos */
+  input,
+  button,
+  .chart-label {
+    @apply font-mono;
+  }
+}
+
+@layer components {
+
+  /* Utilitários de IDG para o Dashboard */
+  .panel-base {
+    @apply bg-industrial-900/40 border border-white/5 backdrop-blur-md;
+  }
+
+  .tech-accent {
+    @apply text-atena-yellow uppercase tracking-[0.25em] text-[10px] font-bold font-mono;
+  }
+}
