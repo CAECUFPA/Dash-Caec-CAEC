@@ -1,8 +1,10 @@
 import React, { useState, useMemo, useEffect } from 'react';
 import {
   Calendar, Filter, Download, RefreshCcw,
-  ChevronDown, Layers, Target, X, Info, Menu, HardHat // Adicionados Menu e HardHat
+  ChevronDown, Layers, Target, X, Menu
 } from 'lucide-react';
+// Usando o elmo da Game Icons para o tema Atena
+import { GiSpartanHelmet } from 'react-icons/gi';
 import { parseDate, toISODate, formatDateBR } from '../utils/dataHandlers';
 
 const Btn = ({ children, onClick, active, icon: Icon }) => (
@@ -26,7 +28,6 @@ export default function Sidebar({
   const [catOpen, setCatOpen] = useState(false);
   const isAll = !filters.categoria || filters.categoria.length === 0;
 
-  // Lógica de limites de data (inalterada)
   const dbLimits = useMemo(() => {
     if (!rawData || rawData.length === 0) return null;
     const validDates = rawData
@@ -36,9 +37,7 @@ export default function Sidebar({
     if (validDates.length === 0) return null;
     return {
       min: toISODate(validDates[0]),
-      max: toISODate(validDates[validDates.length - 1]),
-      displayMin: formatDateBR(validDates[0]),
-      displayMax: formatDateBR(validDates[validDates.length - 1])
+      max: toISODate(validDates[validDates.length - 1])
     };
   }, [rawData]);
 
@@ -50,17 +49,15 @@ export default function Sidebar({
 
   return (
     <>
-      {/* GATILHO MOBILE: Aparece quando a barra está fechada */}
       {!isOpen && (
         <button
           onClick={() => setIsOpen(true)}
-          className="fixed top-6 left-6 z-40 md:hidden p-3 bg-atena-yellow text-black rounded-xl shadow-lg active:scale-90 transition-transform hover:shadow-[0_0_20px_rgba(251,191,36,0.2)]"
+          className="fixed top-6 left-6 z-40 md:hidden p-3 bg-atena-yellow text-black rounded-xl shadow-lg active:scale-90 transition-transform"
         >
           <Menu size={24} strokeWidth={3} />
         </button>
       )}
 
-      {/* OVERLAY: Escurece o fundo no mobile */}
       {isOpen && (
         <div
           className="fixed inset-0 bg-black/80 z-40 md:hidden backdrop-blur-sm transition-opacity"
@@ -73,8 +70,8 @@ export default function Sidebar({
         ${isOpen ? 'translate-x-0' : '-translate-x-full md:translate-x-0'}
       `}>
 
-        {/* HEADER MODIFICADO */}
-        <div className="relative flex items-center gap-4 px-8 h-32 border-b border-white/5 shrink-0">
+        {/* HEADER COM SÍMBOLO DE ALTA QUALIDADE */}
+        <div className="relative flex items-center gap-5 px-8 h-36 border-b border-white/5 shrink-0">
           <button
             onClick={() => setIsOpen(false)}
             className="absolute top-6 right-6 text-slate-500 md:hidden hover:text-white"
@@ -82,73 +79,84 @@ export default function Sidebar({
             <X size={20} />
           </button>
 
-          {/* NOVO ÍCONE DE CAPACETE (HardHat) */}
-          <div className="p-3 bg-atena-yellow/10 rounded-2xl border border-atena-yellow/20 shadow-[0_0_30px_rgba(251,191,36,0.05)] text-atena-yellow">
-            <HardHat size={32} />
+          {/* EMBLEMA ATENA PREMIUM */}
+          <div className="relative group">
+            {/* Brilho de fundo (Aura) */}
+            <div className="absolute inset-0 bg-atena-yellow/20 blur-2xl rounded-full group-hover:bg-atena-yellow/40 transition-all duration-500" />
+
+            <div className="relative p-3.5 bg-gradient-to-br from-atena-yellow/20 to-transparent rounded-2xl border border-atena-yellow/30 shadow-2xl backdrop-blur-md">
+              <GiSpartanHelmet
+                size={38}
+                className="text-atena-yellow drop-shadow-[0_0_8px_rgba(251,191,36,0.8)] filter brightness-110"
+              />
+            </div>
           </div>
 
           <div className="flex flex-col">
             <h1 className="text-2xl font-black text-white italic leading-none uppercase tracking-tighter">
-              ADM <span className="text-atena-yellow">/ FIN</span>
+              ADM <span className="text-atena-yellow drop-shadow-[0_0_10px_rgba(251,191,36,0.3)]">/ FIN</span>
             </h1>
-            <p className="text-[9px] font-bold text-slate-500 uppercase tracking-[0.4em] mt-2">
-              — CAEC UFPA
-            </p>
+            <div className="flex items-center gap-2 mt-2">
+              <span className="h-[1px] w-4 bg-atena-yellow/50"></span>
+              <p className="text-[9px] font-bold text-slate-500 uppercase tracking-[0.4em]">
+                CAEC UFPA- CAMPUS BELÉM
+              </p>
+            </div>
           </div>
         </div>
 
-        {/* CONTEÚDO SCROLLABLE (inalterado) */}
+        {/* CONTEÚDO SCROLLABLE */}
         <div className="flex-1 overflow-y-auto px-6 py-8 space-y-10 [scrollbar-width:none] [&::-webkit-scrollbar]:hidden">
 
           {/* SEÇÃO CRONOGRAMA */}
           <section className="space-y-5">
-            <div className="flex items-center gap-3 px-1">
+            <div className="flex items-center gap-3 px-1 border-l-2 border-atena-yellow/30 ml-1">
               <Calendar size={12} className="text-atena-yellow" />
-              <h4 className="text-[10px] font-black text-slate-500 uppercase tracking-[0.3em]">Cronograma</h4>
+              <h4 className="text-[10px] font-black text-slate-400 uppercase tracking-[0.3em]">Janela de Tempo</h4>
             </div>
 
             <div className="space-y-4">
-              <div className="relative group cursor-pointer">
-                <label className="absolute -top-2 left-4 px-2 bg-[#030712] text-[8px] text-atena-yellow font-black uppercase tracking-widest z-10">Início</label>
+              <div className="relative group">
+                <label className="absolute -top-2 left-4 px-2 bg-[#030712] text-[8px] text-atena-yellow font-black uppercase tracking-widest z-10">Data Inicial</label>
                 <input
                   type="date"
                   value={dateRange.start}
                   onChange={e => setDateRange(p => ({ ...p, start: e.target.value }))}
-                  className="w-full bg-white/[0.02] border border-white/10 p-4 rounded-2xl text-xs text-white outline-none focus:border-atena-yellow/40 transition-all font-bold"
+                  className="w-full bg-white/[0.02] border border-white/10 p-4 rounded-2xl text-xs text-white outline-none focus:border-atena-yellow/40 focus:bg-atena-yellow/[0.03] transition-all font-bold"
                 />
               </div>
 
-              <div className="relative group cursor-pointer">
-                <label className="absolute -top-2 left-4 px-2 bg-[#030712] text-[8px] text-atena-yellow font-black uppercase tracking-widest z-10">Fim</label>
+              <div className="relative group">
+                <label className="absolute -top-2 left-4 px-2 bg-[#030712] text-[8px] text-atena-yellow font-black uppercase tracking-widest z-10">Data Final</label>
                 <input
                   type="date"
                   value={dateRange.end}
                   onChange={e => setDateRange(p => ({ ...p, end: e.target.value }))}
-                  className="w-full bg-white/[0.02] border border-white/10 p-4 rounded-2xl text-xs text-white outline-none focus:border-atena-yellow/40 transition-all font-bold"
+                  className="w-full bg-white/[0.02] border border-white/10 p-4 rounded-2xl text-xs text-white outline-none focus:border-atena-yellow/40 focus:bg-atena-yellow/[0.03] transition-all font-bold"
                 />
               </div>
             </div>
           </section>
 
-          {/* SEÇÃO SETORES/CATEGORIAS */}
+          {/* SEÇÃO SETORES */}
           <section className="space-y-4">
-            <div className="flex items-center gap-3 px-1">
+            <div className="flex items-center gap-3 px-1 border-l-2 border-atena-yellow/30 ml-1">
               <Filter size={12} className="text-atena-yellow" />
-              <h4 className="text-[10px] font-black text-slate-500 uppercase tracking-[0.3em]">Setores</h4>
+              <h4 className="text-[10px] font-black text-slate-400 uppercase tracking-[0.3em]">Filtragem</h4>
             </div>
 
             <button
               onClick={() => setCatOpen(!catOpen)}
-              className="w-full flex justify-between items-center bg-white/[0.03] border border-white/10 p-4 rounded-2xl text-xs text-white font-black uppercase hover:bg-white/5 transition-all"
+              className="w-full flex justify-between items-center bg-white/[0.03] border border-white/10 p-4 rounded-2xl text-xs text-white font-black uppercase hover:border-atena-yellow/20 transition-all shadow-inner"
             >
               <span className={isAll ? 'text-slate-500' : 'text-atena-yellow'}>
-                {isAll ? 'Filtrar Categorias' : `${filters.categoria.length} Selecionados`}
+                {isAll ? 'Categorias' : `${filters.categoria.length} Selecionados`}
               </span>
-              <ChevronDown size={14} className={`text-atena-yellow transition-transform ${catOpen ? 'rotate-180' : ''}`} />
+              <ChevronDown size={14} className={`text-atena-yellow transition-transform duration-300 ${catOpen ? 'rotate-180' : ''}`} />
             </button>
 
             {catOpen && (
-              <div className="mt-2 space-y-1.5 max-h-60 overflow-y-auto p-2 bg-black/40 rounded-2xl border border-white/5">
+              <div className="mt-2 space-y-1.5 max-h-60 overflow-y-auto p-2 bg-black/40 rounded-2xl border border-white/5 custom-scrollbar">
                 <Btn onClick={() => setFilters(p => ({ ...p, categoria: [] }))} active={isAll} icon={Target}>Tudo</Btn>
                 {categories.map(cat => (
                   <Btn
@@ -173,22 +181,22 @@ export default function Sidebar({
 
           <button
             onClick={onExport}
-            className="w-full flex items-center justify-center gap-3 py-4 rounded-2xl border border-white/5 text-slate-500 text-[10px] font-black uppercase tracking-[0.2em] hover:bg-white/5 hover:text-white transition-all"
+            className="w-full flex items-center justify-center gap-3 py-4 rounded-2xl border border-white/5 text-slate-500 text-[10px] font-black uppercase tracking-[0.2em] hover:bg-white/5 hover:text-white transition-all group"
           >
-            <Download size={14} />
-            Exportar Dados
+            <Download size={14} className="group-hover:-translate-y-0.5 transition-transform" />
+            Exportar Relatório
           </button>
         </div>
 
         {/* FOOTER - SINCRONIZAÇÃO */}
-        <div className="p-8 border-t border-white/5">
+        <div className="p-8 border-t border-white/5 bg-black/20">
           <button
             onClick={onSync}
             disabled={isLoading}
-            className="w-full flex items-center justify-center gap-4 py-5 rounded-2xl bg-atena-yellow text-black text-[11px] font-black uppercase tracking-[0.25em] shadow-[0_10px_30px_rgba(251,191,36,0.2)] active:scale-[0.97] transition-all disabled:opacity-50"
+            className="w-full flex items-center justify-center gap-4 py-5 rounded-2xl bg-atena-yellow text-black text-[11px] font-black uppercase tracking-[0.25em] shadow-[0_10px_40px_rgba(251,191,36,0.15)] hover:shadow-[0_15px_45px_rgba(251,191,36,0.25)] active:scale-[0.98] transition-all disabled:opacity-50"
           >
             <RefreshCcw size={18} className={isLoading ? 'animate-spin' : ''} />
-            {isLoading ? 'Aguarde...' : 'Sincronizar'}
+            {isLoading ? 'Sincronizando...' : 'Atualizar Dados'}
           </button>
         </div>
       </aside>

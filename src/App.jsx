@@ -1,7 +1,7 @@
 import React, { useState, useMemo, useEffect } from 'react';
 import {
   Wallet, ArrowUpCircle, ArrowDownCircle,
-  Globe, Cpu, Camera, ExternalLink
+  Globe, Landmark, Camera, ExternalLink, TrendingUp // Trocado Cpu por Landmark e adicionado TrendingUp
 } from 'lucide-react';
 
 import { useDashboardData } from './hooks/useDashboardData';
@@ -125,6 +125,7 @@ const App = () => {
             <DataTable
               data={tableData.slice((page - 1) * 12, page * 12)}
               page={page}
+              totalParticipantes={tableData.length}
               totalPages={Math.max(1, Math.ceil(tableData.length / 12))}
               onNext={() => setPage(p => p + 1)}
               onPrev={() => setPage(p => p - 1)}
@@ -144,7 +145,6 @@ const App = () => {
                     <span>Instagram</span>
                   </a>
 
-                  {/* Mensagem com Link Atrelado */}
                   <div className="h-4 w-[1px] bg-white/10 hidden md:block" />
 
                   <a href="https://portfolio-ricardo-v1.vercel.app/" target="_blank" rel="noopener noreferrer"
@@ -161,18 +161,32 @@ const App = () => {
                 </div>
               </div>
 
-              {/* Lado Direito: Selo de Autenticidade CAEC */}
+              {/* Lado Direito: Selo de Autenticidade Financeira (ATUALIZADO) */}
               <div className="relative group">
-                <div className="absolute -inset-0.5 bg-gradient-to-r from-blue-500/20 to-atena-yellow/20 rounded-2xl blur opacity-30 group-hover:opacity-60 transition duration-1000"></div>
-                <div className="relative flex items-center gap-5 bg-[#0a0f1a] border border-white/10 px-8 py-5 rounded-2xl">
-                  <div className="p-2 bg-blue-500/10 rounded-lg">
-                    <Cpu size={18} className="text-blue-500 animate-pulse" />
+                {/* Glow de fundo mais sofisticado em dourado/azul */}
+                <div className="absolute -inset-1 bg-gradient-to-r from-blue-600/20 via-atena-yellow/20 to-blue-600/20 rounded-2xl blur-xl opacity-30 group-hover:opacity-100 transition duration-1000"></div>
+
+                <div className="relative flex items-center gap-5 bg-[#0a0f1a]/80 backdrop-blur-xl border border-white/10 px-8 py-5 rounded-2xl shadow-2xl">
+                  <div className="relative">
+                    {/* Ícone de Landmark (Instituição/Tesouraria) */}
+                    <div className="p-2.5 bg-atena-yellow/10 rounded-xl border border-atena-yellow/20 shadow-[0_0_15px_rgba(251,191,36,0.1)]">
+                      <Landmark size={20} className="text-atena-yellow drop-shadow-md" />
+                    </div>
+                    {/* Badge flutuante de trending */}
+                    <div className="absolute -top-1 -right-1 bg-blue-500 rounded-full p-0.5 border border-[#0a0f1a]">
+                      <TrendingUp size={8} className="text-white" />
+                    </div>
                   </div>
+
                   <div className="flex flex-col">
-                    <p className="text-[9px] font-black text-white uppercase tracking-[0.3em] leading-tight">
-                      CAEC UFPA <span className="text-slate-500 mx-2">|</span> 2026
-                    </p>
-                    <p className="text-[7px] font-bold text-atena-yellow/60 uppercase tracking-[0.1em] mt-1">
+                    <div className="flex items-center gap-2">
+                      <p className="text-[10px] font-black text-white uppercase tracking-[0.3em] leading-tight">
+                        CAEC UFPA
+                      </p>
+                      <span className="h-[1px] w-3 bg-white/20"></span>
+                      <span className="text-[9px] font-bold text-slate-500">2026</span>
+                    </div>
+                    <p className="text-[7px] font-black text-atena-yellow/80 uppercase tracking-[0.15em] mt-1.5">
                       Diretoria de Administração Financeira
                     </p>
                   </div>
